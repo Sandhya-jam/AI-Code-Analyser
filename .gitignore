@@ -1,0 +1,16 @@
+node_modules/
+
+#backend
+backend/node_modules/
+
+#Frontend
+frontend/node_modules/
+
+#Python
+analysis_service/venv/
+analysis_service/__pycache__/
+analysis_service/*.pyc 
+
+#Environment variables
+backend/.env 
+analysis_service/.env
