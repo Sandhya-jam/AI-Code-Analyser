@@ -4,10 +4,10 @@ class PythonAnalyzer(ast.NodeVisitor):
     def __init__(self):
         self.functions=0
         self.function_metrics={}
-        self.global_assigned=set(),
-        self.global_used=set(),
-        self.function_assigned={},
-        self.function_used={},
+        self.global_assigned=set()
+        self.global_used=set()
+        self.function_assigned={}
+        self.function_used={}
         self.loops=0
         self.conditionals=0
         self.variables=set()
@@ -19,13 +19,13 @@ class PythonAnalyzer(ast.NodeVisitor):
         self.function_returns={}
         
     def visit_FunctionDef(self,node):
+        function_name=node.name
         self.function_assigned[function_name]=set()
         self.function_used[function_name]=set()
         
         self.function_returns[function_name]=False
         self.functions+=1
         
-        function_name=node.name
         self.current_function=function_name
         
         # Initialise fn metrics
@@ -121,8 +121,8 @@ def analyze_python_code(source_code):
             
             "global_assigned":list(analyzer.global_assigned),
             "global_used":list(analyzer.global_used),
-            "function_assigned":list(analyzer.function_assigned),
-            "function_used":list(analyzer.function_used),
+            "function_assigned":analyzer.function_assigned,
+            "function_used":analyzer.function_used,
             
             "loops":analyzer.loops,
             "conditionals":analyzer.conditionals,

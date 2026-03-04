@@ -1,0 +1,49 @@
+Test Case 1:Infinite Loop + Division by Zero + Use Before Assignment
+{
+  "code": "def test():\n    print(x)\n    x = 5\n\nwhile True:\n    print('loop')\n\ny = 10 / 0"
+}
+
+Test Case 2:Constant Condition + Duplicate Condition
+{
+  "code": "def check(x):\n    if True:\n        print('always')\n\n    if x > 5:\n        print('big')\n    elif x > 5:\n        print('duplicate')"
+}
+
+Test Case 3 — Too Many Parameters
+{
+  "code": "def calculate(a,b,c,d,e,f,g):\n    return a+b+c+d+e+f+g"
+}
+
+Test Case 4 — Shadowed Variable
+{
+  "code": "x = 10\n\ndef test():\n    x = 20\n    print(x)"
+}
+
+Test Case 5 — Redundant Assignment
+{
+  "code": "x = 5\nx = 10\nprint(x)"
+}
+
+Test Case 6 — Index Out of Bounds
+{
+  "code": "arr = [1,2,3]\nprint(arr[5])"
+}
+
+Test Case 7 — Unreachable Code
+{
+  "code": "def foo():\n    return 10\n    print('never runs')"
+}
+
+Test Case 8 — Deep Nesting
+{
+  "code": "def deep(x):\n    if x > 0:\n        for i in range(5):\n            while i < 3:\n                if i == 1:\n                    print(i)"
+}
+
+Test Case 9 — Excessive Loops
+{
+  "code": "for i in range(5):\n    pass\n\nfor j in range(5):\n    pass\n\nfor k in range(5):\n    pass\n\nfor l in range(5):\n    pass\n\nfor m in range(5):\n    pass\n\nfor n in range(5):\n    pass"
+}
+
+Test Case 10 — Large Mixed Case (Best Stress Test)
+{
+  "code": "x = 5\n\ndef risky(a,b,c,d,e,f,g):\n\n    print(z)\n\n    if True:\n        print('constant')\n\n    if a > 5:\n        print('big')\n    elif a > 5:\n        print('duplicate')\n\n    arr=[1,2,3]\n    print(arr[7])\n\n    y = 5\n    y = 10\n\n    while True:\n        print('loop')\n\n    return a\n    print('dead code')"
+}

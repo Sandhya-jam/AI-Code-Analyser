@@ -22,34 +22,49 @@ def check_infinite_loops(source_code):
                         for n in ast.walk(node)
                     )
                     if not has_break:
-                        warnings.append(
-                            "Potential infinite loop: 'while True' without break"
-                        )
+                        warnings.append({
+                            "message": "Potential infinite loop detected",
+                            "severity": "CRITICAL",
+                            "rule": "INFINITE_LOOP",
+                            "line": node.lineno
+                        })
 
     except Exception:
         pass
 
     return warnings
 
-def check_missing_return(result):
-    warnings = []
+def check_missing_return(source_code):
 
-    function_returns = result.get("function_returns", {})
-    function_metrics = result.get("function_metrics", {})
+    findings = []
+    tree = ast.parse(source_code)
 
-    for func in function_metrics:
-        lines = function_metrics[func].get("lines", 0)
+    for node in ast.walk(tree):
 
-        # Ignore empty or very small functions
-        if lines <= 1:
-            continue
+        if isinstance(node, ast.FunctionDef):
 
-        if not function_returns.get(func, False):
-            warnings.append(
-                f"Function '{func}' does not have a return statement"
-            )
+            has_return = False
+            has_possible_path_without_return = False
 
-    return warnings
+            for child in ast.walk(node):
+
+                if isinstance(child, ast.Return):
+                    has_return = True
+
+                if isinstance(child, ast.If):
+                    if not any(isinstance(n, ast.Return) for n in ast.walk(child)):
+                        has_possible_path_without_return = True
+
+            if has_return and has_possible_path_without_return:
+
+                findings.append({
+                    "message": f"Function '{node.name}' may exit without returning a value",
+                    "severity": "HIGH",
+                    "rule": "MISSING_RETURN",
+                    "line": node.lineno
+                })
+
+    return findings
 
 def check_unused_variables(result):
     warnings=[]
@@ -61,7 +76,12 @@ def check_unused_variables(result):
     unused_globals=global_assigned-global_used
     
     for var in unused_globals:
-        warnings.append(f"Global variable '{var}' is assigned but never used")
+        warnings.append({
+            "message": f"Global variable '{var}' assigned but never used",
+            "severity": "LOW",
+            "rule": "UNUSED_VARIABLE",
+            "line": None
+        })
     
     # Function Scope
     function_assigned=result.get("function_assigned",{})
@@ -74,9 +94,12 @@ def check_unused_variables(result):
         unused=assigned-used
         
         for var in unused:
-            warnings.append(
-                f"Variable '{var}' in function '{func}' is assigned but never used"
-            )
+            warnings.append({
+                "message": f"Variable '{var}' assigned but never used in function '{func}'",
+                "severity": "LOW",
+                "rule": "UNUSED_VARIABLE",
+                "line": None
+            })
     return warnings
 
 def check_constant_conditions(source_code):
@@ -88,12 +111,108 @@ def check_constant_conditions(source_code):
         for node in ast.walk(tree):
             if isinstance(node,ast.If):
                 if isinstance(node.test,ast.Constant):
-                    warnings.append("Constant condition detected in if statement")
+                    warnings.append({
+                        "message": "Constant condition detected",
+                        "severity": "MEDIUM",
+                        "rule": "CONSTANT_CONDITION",
+                        "line": node.lineno
+                    })
                 
                 if isinstance(node.test,ast.Compare):
                     if isinstance(node.test.left,ast.Constant) and \
                         all(isinstance(comp,ast.Constant) for comp in node.test.comparators):
-                            warnings.append("Always-true or Always-false comparision detected")
+                            warnings.append({
+                                "message": "Constant condition detected",
+                                "severity": "MEDIUM",
+                                "rule": "CONSTANT_CONDITION",
+                                "line": node.lineno
+                            })
     except:
         pass
+    return warnings
+
+def check_unreachable_code(source_code):
+    warnings=[]
+    try:
+        tree=ast.parse(source_code)
+        
+        for node in ast.walk(tree):
+            if hasattr(node,"body") and isinstance(node.body,list):
+                for i,stmt in enumerate(node.body[:-1]):
+                    if isinstance(stmt,(ast.Return,ast.Break,ast.Continue)):
+                        warnings.append({
+                            "message": "Unreachable code detected after control statement",
+                            "severity": "HIGH",
+                            "rule": "UNREACHABLE_CODE",
+                            "line": stmt.lineno
+                        })
+    except:
+        pass
+    
+    return warnings
+
+def check_use_before_assignment(source_code):
+    warnings = []
+
+    try:
+        tree = ast.parse(source_code)
+        builtin_names = set()
+
+        # Handle global scope
+        assigned_global = set()
+
+        for node in tree.body:
+            if isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if isinstance(target, ast.Name):
+                        assigned_global.add(target.id)
+
+            if isinstance(node, ast.Expr):
+                for child in ast.walk(node):
+                    if isinstance(child, ast.Name):
+                        if isinstance(child.ctx, ast.Load):
+                            if child.id not in assigned_global and child.id not in builtin_names:
+                                warnings.append({
+                                    "message": f"Variable '{node.id}' used before assignment",
+                                    "severity": "HIGH",
+                                    "rule": "USE_BEFORE_ASSIGNMENT",
+                                    "line": node.lineno
+                                })
+
+            if isinstance(node, ast.FunctionDef):
+                warnings += _check_function_scope(node, builtin_names)
+
+    except:
+        pass
+
+    return warnings
+
+def _check_function_scope(function_node, builtin_names):
+    warnings = []
+
+    assigned = set()
+    params = {arg.arg for arg in function_node.args.args}
+
+    for stmt in function_node.body:
+        # Check variable usage first
+        for child in ast.walk(stmt):
+            if isinstance(child, ast.Name) and isinstance(child.ctx, ast.Load):
+                if (
+                    child.id not in assigned
+                    and child.id not in params
+                    and child.id not in builtin_names
+                ):
+                    warnings.append({
+                        "message":f"Variable '{child.id}' used before assignment in function '{function_node.name}'",
+                        "severity":"MEDIUM",
+                        "rule":"USED BEFORE ASSIGNMENT(FUNCTION)",
+                        "line":child.lineno
+                    })
+
+        # Then track assignments
+        if isinstance(stmt, ast.Assign):
+            for target in stmt.targets:
+                if isinstance(target, ast.Name):
+                    assigned.add(target.id)
+
     return warnings
