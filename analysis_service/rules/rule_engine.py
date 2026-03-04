@@ -11,7 +11,6 @@ from rules.logic_rules import(
     check_unused_variables,
     check_constant_conditions,
     check_unreachable_code,
-    check_use_before_assignment
 )
 
 from rules.logic_rules2 import(
@@ -37,7 +36,6 @@ def apply_rules(result,source_code):
     warnings+=check_unused_variables(result)
     warnings+=check_constant_conditions(source_code)
     warnings+=check_unreachable_code(source_code)
-    warnings+=check_use_before_assignment(source_code)
     # Logical rules2
     warnings+=check_duplicate_conditions(source_code)
     warnings+=check_redundant_assignment(source_code)
