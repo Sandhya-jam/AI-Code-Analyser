@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from analyzers.python_analyzer import analyze_python_code
 from rules.rule_engine import apply_rules,calculate_risk_score
+from ai_analyzer import analyze_code_with_ai
+from utils.ai_filter import filter_ai_results
+from utils.ai_severity_processor import merge_ai_findings
 
 app=FastAPI()
 
@@ -20,6 +23,7 @@ def analyze_code(code:CodeInput):
         return result
     
     rule_result=apply_rules(result,code.source)
+    ai_result=analyze_code_with_ai(code.source)
     
     critical=[]
     high=[]
@@ -37,6 +41,23 @@ def analyze_code(code:CodeInput):
         elif f["severity"]=="LOW":
             low.append(f)
             
+    ai_result=filter_ai_results(
+        ai_result,
+        {
+            "critical":critical,
+            "high":high,
+            "medium":medium,
+            "low":low
+        }
+    )
+    
+    critical,high,medium,low=merge_ai_findings(
+        ai_result,
+        critical,
+        high,
+        medium,
+        low
+    )
     risk_score=calculate_risk_score(result,critical,high,medium,low)
     
     return{
@@ -45,5 +66,6 @@ def analyze_code(code:CodeInput):
         "high":high,
         "medium":medium,
         "low":low,
-        "risk_score":risk_score
+        "risk_score":risk_score,
+        "ai_analysis":ai_result
     }
