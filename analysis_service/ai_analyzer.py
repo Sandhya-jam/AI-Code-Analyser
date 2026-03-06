@@ -31,6 +31,39 @@ def extract_json(text):
 
     return text
 
+def HelperFn(prompt,role):
+    try:
+        response=client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                {"role":"system","content":role},
+                {"role":"user","content":prompt}
+            ],
+            temperature=0
+        )
+        content=response.choices[0].message.content
+        
+        # Remove markdown code blocks
+        if content.startswith("```"):
+            content=content.split("```")[1]
+            if content.startswith("json"):
+                content=content[4:]
+        
+        content=content.strip()
+        # attempt to prepare JSON
+        try:
+            return json.loads(content)
+        except:
+            return{
+                "error":"AI returned non-JSON response",
+                "raw_output":content
+            }
+    except Exception as e:
+        return{
+            "error":"AI analysis failed",
+            "details":str(e)
+        }
+
 def analyze_code_with_ai(source_code:str):
     prompt=f"""
     You are an expert Python code reviewer.
@@ -92,34 +125,39 @@ Required JSON format:
 Code:
 {source_code}
 """
-    try:
-        response=client.chat.completions.create(
-            model=MODEL,
-            messages=[
-                {"role":"system","content":"You are a strict JSON code analysis assistant."},
-                {"role":"user","content":prompt}
-            ],
-            temperature=0
-        )
-        content=response.choices[0].message.content
+    role="You are a strict JSON code analysis assistant."
+    result=HelperFn(prompt,role)
+    return result
         
-        # Remove markdown code blocks
-        if content.startswith("```"):
-            content=content.split("```")[1]
-            if content.startswith("json"):
-                content=content[4:]
-        
-        content=content.strip()
-        # attempt to prepare JSON
-        try:
-            return json.loads(content)
-        except:
-            return{
-                "error":"AI returned non-JSON response",
-                "raw_output":content
-            }
-    except Exception as e:
-        return{
-            "error":"AI analysis failed",
-            "details":str(e)
-        }
+def generate_fixed_code(source_code:str):
+    prompt=f"""
+    You are an expert Python code reviewer.
+
+Your task is to fix and improve the following Python code.
+
+Tasks:
+1. Fix logical bugs
+2. Fix syntax errors
+3. Improve readability
+4. Improve performance if possible
+5. Follow Python best practices
+
+IMPORTANT RULES:
+- Return ONLY the corrected Python code.
+- Do NOT include explanations.
+- Do NOT include markdown formatting.
+
+Return STRICT JSON in this format:
+Do NOT include markdown or explanations outside JSON.
+
+Code:
+{source_code}
+
+Required JSON format:
+{{
+    "fixed_code":""
+}}
+"""
+    role="You fix Python code."
+    result=HelperFn(prompt,role)
+    return result

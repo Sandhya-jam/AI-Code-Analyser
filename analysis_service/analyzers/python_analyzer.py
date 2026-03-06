@@ -236,6 +236,7 @@ def analyze_python_code(source_code):
     except SyntaxError as e:
 
         return {
-            "error": "Syntax error",
-            "details": str(e)
+            "syntax_error":True,
+            "message":str(e),
+            "line":e.lineno
         }

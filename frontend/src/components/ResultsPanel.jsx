@@ -18,7 +18,7 @@ const ResultsPanel = ({result}) => {
             </h2>
             <div className="bg-gray-700 rounded-full h-4">
                 <div className="bg-green-500 h-4 rounded-full"
-                style={{width:`${100-result.risk_score}%`}}
+                style={{width:`${result.risk_score}%`}}
                 />
             </div>
             <p className="mt-2 text-yellow-400">
@@ -31,10 +31,10 @@ const ResultsPanel = ({result}) => {
             <h2 className="text-red-400 font-semibold">
                 Critical Issues
             </h2>
-            {result.critical.length===0 ? (
+            {result.critical?.length===0 ? (
                 <p className='text-gray-400'>None</p>
             ):(
-                result.critical.map((bug,index)=>(
+                result.critical?.map((bug,index)=>(
                     <div key={index} className='text-sm'>
                         Line {bug.line} : {bug.message}
                     </div>
@@ -46,10 +46,10 @@ const ResultsPanel = ({result}) => {
             <h2 className="text-orange-900 font-semibold">
                 high Issues
             </h2>
-            {result.high.length===0 ? (
+            {result.high?.length===0 ? (
                 <p className='text-gray-400'>None</p>
             ):(
-                result.high.map((bug,index)=>(
+                result.high?.map((bug,index)=>(
                     <div key={index} className='text-sm'>
                         Line {bug.line} : {bug.message}
                     </div>
@@ -61,10 +61,10 @@ const ResultsPanel = ({result}) => {
             <h2 className="text-yellow-500 font-semibold">
                 medium Issues
             </h2>
-            {result.medium.length===0 ? (
+            {result.medium?.length===0 ? (
                 <p className='text-gray-400'>None</p>
             ):(
-                result.medium.map((bug,index)=>(
+                result.medium?.map((bug,index)=>(
                     <div key={index} className='text-sm'>
                         Line {bug.line} : {bug.message}
                     </div>
@@ -76,10 +76,10 @@ const ResultsPanel = ({result}) => {
             <h2 className="text-green-400 font-semibold">
                 low Issues
             </h2>
-            {result.low.length===0 ? (
+            {result.low?.length===0 ? (
                 <p className='text-gray-400'>None</p>
             ):(
-                result.low.map((bug,index)=>(
+                result.low?.map((bug,index)=>(
                     <div key={index} className='text-sm'>
                         Line {bug.line} : {bug.message}
                     </div>
