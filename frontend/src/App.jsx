@@ -1,8 +1,10 @@
-import React from 'react'
+import AnalyzerPage from "./pages/AnalyzerPage"
 
 const App = () => {
   return (
-    <div>App</div>
+    <>
+    <AnalyzerPage/>
+    </>
   )
 }
 
