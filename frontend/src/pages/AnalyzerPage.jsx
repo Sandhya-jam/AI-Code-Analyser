@@ -8,7 +8,9 @@ const AnalyzerPage = () => {
 
 const [result,setResult]=useState(null);
 const [markers,setMarkers]=useState([]);
-const [code,setCode] = useState("");
+const [code,setCode] = useState(`# Paste your python code here
+print("hello")
+`);
 const [fixedCode,setFixedCode] = useState("");
 
 async function analyzeCode(code){
@@ -46,22 +48,25 @@ async function analyzeCode(code){
 }
 
 async function fixCode(code){
+try {
+  const res = await fetch("http://localhost:5000/fix",{
+  method:"POST",
+  headers:{
+  "Content-Type":"application/json"
+  },
+  body:JSON.stringify({code})
+  });
 
-const res = await fetch("http://localhost:5000/fix",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({code})
-});
+  const data = await res.json();
 
-const data = await res.json();
-
-if(data.fixed_code){
-setFixedCode(data.fixed_code);
+  console.log("Fix Response",data)
+  if(data.fixed_code){
+  setFixedCode(data.fixed_code);
 }
-
+} catch (error) {
+  console.error("Fix Error:",error);
 }
+};
 
 return (
 
@@ -85,13 +90,15 @@ return (
         onAnalyze={analyzeCode}
         onFix={fixCode}
         markers={markers}
+        code={code}
+        setCode={setCode}
         />
     </div>
 
     <div className="bg-gray-800 rounded-xl p-4 shadow-lg">
     <FixComparison
     originalCode={code}
-    fixedCode={fixCode}
+    fixedCode={fixedCode}
     onApply={()=>{
         setCode(fixedCode);
         setFixedCode("");

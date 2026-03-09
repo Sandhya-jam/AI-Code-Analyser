@@ -26,6 +26,7 @@ app.post("/analyze",async(req,res)=>{
 });
 app.post("/fix",async(req,res)=>{
     try {
+    console.log(req.body)
     const result = await fixCode(req.body.code);
 
     const saved = await codeReport.create({

@@ -1,11 +1,7 @@
 import Editor from "@monaco-editor/react";
 import { useState, useEffect } from "react";
 
-export const CodeEditor = ({ onAnalyze, onFix, markers }) => {
-
-const [code,setCode] = useState(`# Paste your python code here
-print("hello")
-`);
+export const CodeEditor = ({ onAnalyze, onFix, markers,code,setCode }) => {
 
 const [editorInstance,setEditorInstance] = useState(null);
 
@@ -48,7 +44,9 @@ height="100%"
 defaultLanguage="python"
 value={code}
 theme="vs-dark"
-onChange={(value)=>setCode(value)}
+onChange={(value)=>{
+setCode(value)
+}}
 onMount={handleEditorDidMount}
 options={{
 fontSize:14,
