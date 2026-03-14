@@ -1,8 +1,10 @@
-import { useState } from "react"
+import { useState,useEffect } from "react"
 import { CodeEditor } from "../components/CodeEditor"
 import ResultsPanel from "../components/ResultsPanel"
 import AIInsights from "../components/AIInsights"
 import FixComparison from "../components/FixComparision";
+import {useNavigate} from 'react-router-dom'
+import { analyzeCode,fixCode } from "../services/api";
 
 const AnalyzerPage = () => {
 
@@ -12,54 +14,36 @@ const [code,setCode] = useState(`# Paste your python code here
 print("hello")
 `);
 const [fixedCode,setFixedCode] = useState("");
+const navigate=useNavigate();
 
-async function analyzeCode(code){
+async function handleAnalyze(code){
+      const data=await analyzeCode(code);
+      setResult(data);
 
-        const response=await fetch("http://localhost:5000/analyze",{
-        method:"POST",
-        headers:{
-        "Content-Type":"application/json"
-        },
-        body:JSON.stringify({code})
-        });
+      const newMarkers=[];
 
-        const data=await response.json();
+      ["critical","high","medium","low"].forEach(level=>{
+      data[level]?.forEach(bug=>{
+      if(!bug.line) return;
 
-        setResult(data);
+      newMarkers.push({
+      startLineNumber:bug.line,
+      endLineNumber:bug.line,
+      startColumn:1,
+      endColumn:1,
+      message:bug.message,
+      severity:8
+      });
+      });
+      });
 
-        const newMarkers=[];
-
-        ["critical","high","medium","low"].forEach(level=>{
-        data[level]?.forEach(bug=>{
-        if(!bug.line) return;
-
-        newMarkers.push({
-        startLineNumber:bug.line,
-        endLineNumber:bug.line,
-        startColumn:1,
-        endColumn:1,
-        message:bug.message,
-        severity:8
-        });
-        });
-        });
-
-        setMarkers(newMarkers);
+      setMarkers(newMarkers);
 }
 
-async function fixCode(code){
+async function handleFix(code){
 try {
-  const res = await fetch("http://localhost:5000/fix",{
-  method:"POST",
-  headers:{
-  "Content-Type":"application/json"
-  },
-  body:JSON.stringify({code})
-  });
+  const data = await fixCode(code);
 
-  const data = await res.json();
-
-  console.log("Fix Response",data)
   if(data.fixed_code){
   setFixedCode(data.fixed_code);
 }
@@ -68,6 +52,13 @@ try {
 }
 };
 
+useEffect(()=>{
+  const token=localStorage.getItem("token");
+
+  if(!token){
+    navigate("/login")
+  }
+},[]);
 return (
 
     <div className="min-h-screen bg-gray-900 text-white">
@@ -87,8 +78,8 @@ return (
 
     <div className="bg-gray-800 rounded-xl p-4 shadow-lg flex flex-col">
     <CodeEditor
-        onAnalyze={analyzeCode}
-        onFix={fixCode}
+        onAnalyze={handleAnalyze}
+        onFix={handleFix}
         markers={markers}
         code={code}
         setCode={setCode}

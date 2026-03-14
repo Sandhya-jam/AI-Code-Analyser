@@ -1,47 +1,16 @@
 import express from 'express'
 import cors from 'cors'
-import { analyzeCode,fixCode } from './services/pythonService.js';
-import codeReport from './models/codeReport.js';
+import authRoutes from './routes/authRoutes.js'
+import historyRoutes from './routes/historyRoutes.js'
+
 const app=express();
 
 app.use(cors())
 app.use(express.json());
 
-app.post("/analyze",async(req,res)=>{
-    try {
-    const result = await analyzeCode(req.body.code);
+app.use("/api/auth",authRoutes)
+app.use("/api/code",historyRoutes)
 
-    const saved = await codeReport.create({
-      sourceCode: req.body.code,
-      analysisResult: result
-    });
-
-    console.log("Saved to DB:", saved._id);
-
-    res.json(result);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Analysis Failed" });
-  }
-});
-app.post("/fix",async(req,res)=>{
-    try {
-    console.log(req.body)
-    const result = await fixCode(req.body.code);
-
-    const saved = await codeReport.create({
-      sourceCode: req.body.code,
-      analysisResult: result
-    });
-
-    console.log("Saved to DB:", saved._id);
-
-    res.json(result);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Code Fix Failed Failed" });
-  }
-});
 app.get("/health",(req,res)=>{
     res.json({status:"Backend Running"});
 });
