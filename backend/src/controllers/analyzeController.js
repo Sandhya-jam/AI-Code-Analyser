@@ -45,7 +45,8 @@ export const fix=async(req,res)=>{
 };
 
 export const getUserhistory=async(req,res)=>{
-   const history=(await History.find()).toSorted({createdAt:-1}).limit(50);
+   const history = await History.find({ user:req.user })
+.sort({ createdAt:-1 });
 
    res.json(history);
 };

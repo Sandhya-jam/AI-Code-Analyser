@@ -5,7 +5,7 @@ import AIInsights from "../components/AIInsights"
 import FixComparison from "../components/FixComparision";
 import {useNavigate} from 'react-router-dom'
 import { analyzeCode,fixCode } from "../services/api";
-
+import { Navbar } from "../components/Navbar";
 const AnalyzerPage = () => {
 
 const [result,setResult]=useState(null);
@@ -62,7 +62,7 @@ useEffect(()=>{
 return (
 
     <div className="min-h-screen bg-gray-900 text-white">
-
+    <Navbar/>
     <div className="max-w-7xl mx-auto p-6">
 
     {/* Header */}

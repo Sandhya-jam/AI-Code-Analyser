@@ -8,7 +8,8 @@ const AIInsights = ({result,type}) => {
     if(type==="explanation"){
         return(
             <div>
-                <p>{result.ai_analysis?.explanation}</p>
+                <p>{result.ai_analysis?.explanation}
+                </p>
             </div>
         );
     }
