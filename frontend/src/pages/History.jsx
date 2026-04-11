@@ -6,7 +6,24 @@ import { Navbar } from "../components/Navbar"
 const History = () => {
     const [history,setHistory]=useState([]);
     const [selected,setSelected]=useState(null);
+    const [filters,setFilters] = useState({
+        action:"all",
+        severity:"all"
+        });
+    const filteredHistory = history.filter(item=>{
+    if(filters.action !== "all" && item.action !== filters.action){
+    return false;
+    }
 
+    if(filters.severity !== "all"){
+
+    const issues = item.result?.[filters.severity];
+    if(!issues || issues.length === 0){
+        return false;
+    }
+    }
+    return true;
+    });
     useEffect(()=>{
         async function fetchHistory() {
             const data=await getHistory();
@@ -22,9 +39,29 @@ const History = () => {
             <h1 className="text-2xl font-bold mb-6">
                 History
             </h1>
+            <div className="flex gap-4 mb-6">
+                <select 
+                onChange={(e)=>setFilters({...filters,action:e.target.value})}
+                className="bg-gray-800 p-2 rounded">
+                    <option value="all">All Actions</option>
+                    <option value="analyze">Analyze</option>
+                    <option value="fix">Fix</option>
+                </select>
+                <select
+                    className="bg-gray-800 p-2 rounded"
+                    onChange={(e)=>setFilters({...filters,severity:e.target.value})}
+                    >
+                    <option value="all">All Severity</option>
+                    <option value="critical">Critical</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+
+                </select>
+            </div>
             {/* Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {history?.map(item=>(
+                {filteredHistory?.map(item=>(
                     <HistoryCard
                     key={item._id}
                     item={item}

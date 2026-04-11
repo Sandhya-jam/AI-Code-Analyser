@@ -12,7 +12,6 @@ export const Login=()=>{
 
   async function handleSubmit(e){
     e.preventDefault();
-    console.log(form)
     try {
         const data=await login(form);
         localStorage.setItem("token",data.token);
