@@ -39,24 +39,24 @@ def analyze_code(code:CodeInput):
             elif f["severity"]=="LOW":
                 low.append(f)
                 
-    ai_result=analyze_code_with_ai(code.source)
-    ai_result=filter_ai_results(
-        ai_result,
-        {
-            "critical":critical,
-            "high":high,
-            "medium":medium,
-            "low":low
-        }
-    )
+    # ai_result=analyze_code_with_ai(code.source)
+    # ai_result=filter_ai_results(
+    #     ai_result,
+    #     {
+    #         "critical":critical,
+    #         "high":high,
+    #         "medium":medium,
+    #         "low":low
+    #     }
+    # )
     
-    critical,high,medium,low=merge_ai_findings(
-        ai_result,
-        critical,
-        high,
-        medium,
-        low
-    )
+    # critical,high,medium,low=merge_ai_findings(
+    #     ai_result,
+    #     critical,
+    #     high,
+    #     medium,
+    #     low
+    # )
     risk_score=calculate_risk_score(result,critical,high,medium,low)
     
     return{
@@ -66,7 +66,7 @@ def analyze_code(code:CodeInput):
         "medium":medium,
         "low":low,
         "risk_score":risk_score,
-        "ai_analysis":ai_result
+        # "ai_analysis":ai_result
     }
     
 @app.post("/fix")

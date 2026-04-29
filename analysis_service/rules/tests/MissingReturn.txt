@@ -1,0 +1,50 @@
+1. No return at all
+{
+  "code": "def foo(x):\n    y = x + 1",
+  "expected": "missing_return"
+}
+2. Return only in one branch
+{
+  "code": "def foo(x):\n    if x > 0:\n        return x",
+  "expected": "missing_return"
+}
+3.Proper if-else (no issue)
+{
+  "code": "def foo(x):\n    if x > 0:\n        return x\n    else:\n        return -x",
+  "expected": "no_issue"
+}
+4. Nested condition missing paths
+{
+  "code": "def foo(x):\n    if x > 0:\n        if x > 10:\n            return x",
+  "expected": "missing_return"
+}
+5. Early return + fallthrough
+{
+  "code": "def foo(x):\n    if x == 0:\n        return 0\n    print(x)",
+  "expected": "missing_return"
+}
+6. Return inside loop only
+{
+  "code": "def foo(arr):\n    for x in arr:\n        if x > 0:\n            return x",
+  "expected": "missing_return"
+}
+7. While loop conditional return
+{
+  "code": "def foo(x):\n    while x > 0:\n        return x",
+  "expected": "missing_return"
+}
+8.Multiple branches, one missing
+{
+  "code": "def foo(x):\n    if x > 10:\n        return 1\n    elif x > 5:\n        return 2",
+  "expected": "missing_return"
+}
+9.Boolean condition range
+{
+  "code": "def foo(x):\n    if x > 0 and x < 10:\n        return x",
+  "expected": "missing_return"
+}
+10.Try-except
+{
+   "code":"def foo(x):\n    try:\n        return x\n    except:\n        print(\"error\")",
+   "expected": "missing_return"
+}
