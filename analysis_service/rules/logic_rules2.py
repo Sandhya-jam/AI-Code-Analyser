@@ -104,90 +104,38 @@ def check_duplicate_conditions(source_code):
     
     try:
         tree=ast.parse(source_code)
-        
+
+        processed=set()
         for node in ast.walk(tree):
-            if isinstance(node,ast.If):
-                seen_conditions=[]
-                
+            if (
+                isinstance(node, ast.If)
+                and id(node) not in processed
+            ):
+                seen=set()
                 current=node
-                while isinstance(current,ast.If):
-                    condition_str=ast.dump(current.test)
-                    
-                    if condition_str in seen_conditions:
+                while isinstance(current, ast.If):
+                    processed.add(id(current))
+                    cond=ast.dump(current.test)
+
+                    if cond in seen:
                         warnings.append({
-                            "message": "Duplicate condition detected in if/elif chain",
-                            "severity": "LOW",
-                            "rule": "DUPLICATE_CONDITION",
+                            "message":
+                            "Duplicate condition detected in if/elif chain",
+                            "severity":"MEDIUM",
+                            "rule":"DUPLICATE_CONDITION",
                             "line": current.lineno
                         })
-                    
-                    seen_conditions.append(condition_str)
-                    
-                    if current.orelse and isinstance(current.orelse[0],ast.If):
+
+                    seen.add(cond)
+                    if (
+                        current.orelse and
+                        len(current.orelse)==1 and
+                        isinstance(current.orelse[0], ast.If)
+                    ):
                         current=current.orelse[0]
                     else:
                         break
-    except:
-        pass
-    return warnings
-
-def check_division_by_zero(source_code):
-    warnings = []
-
-    try:
-        tree = ast.parse(source_code)
-
-        for node in ast.walk(tree):
-            if isinstance(node, ast.BinOp):
-                if isinstance(node.op, (ast.Div, ast.FloorDiv, ast.Mod)):
-                    if isinstance(node.right, ast.Constant) and node.right.value == 0:
-                        warnings.append({
-                            "message": "Division by zero detected",
-                            "severity": "CRITICAL",
-                            "rule": "DIVISION_BY_ZERO",
-                            "line": node.lineno
-                        })
 
     except:
         pass
-
     return warnings
-
-def check_index_out_of_bounds(source_code):
-    warnings = []
-
-    try:
-        tree = ast.parse(source_code)
-        list_sizes = {}
-
-        for node in ast.walk(tree):
-            # Track list definitions
-            if isinstance(node, ast.Assign):
-                if isinstance(node.value, ast.List):
-                    for target in node.targets:
-                        if isinstance(target, ast.Name):
-                            list_sizes[target.id] = len(node.value.elts)
-
-            # Check indexing
-            if isinstance(node, ast.Subscript):
-                if isinstance(node.value, ast.Name) and isinstance(node.slice, ast.Constant):
-                    var_name = node.value.id
-                    index_value = node.slice.value
-
-                    if var_name in list_sizes:
-                        if isinstance(index_value, int):
-                            if index_value >= list_sizes[var_name] or index_value < 0:
-                                warnings.append({
-                                    "message": f"Index out of bounds for list '{var_name}'",
-                                    "severity": "HIGH",
-                                    "rule": "INDEX_OUT_OF_BOUNDS",
-                                    "line": node.lineno
-                                })
-
-    except:
-        pass
-
-    return warnings
-
-
-                    

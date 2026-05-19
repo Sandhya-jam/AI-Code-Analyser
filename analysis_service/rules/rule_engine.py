@@ -18,6 +18,9 @@ from rules.logic_rules2 import(
     check_redundant_assignment,
     check_shadowed_variables,
     check_too_many_parameters,
+)
+
+from rules.logic_rules3 import(
     check_division_by_zero,
     check_index_out_of_bounds
 )

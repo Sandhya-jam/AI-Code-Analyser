@@ -1,0 +1,24 @@
+1.Constant
+{
+  "code":"x=10/0",
+  "expected":"division_by_zero"
+}
+2.Negative zero
+{
+  "code":"x=10/(-0)",
+  "expected":"division_by_zero"
+}
+3.Variable zero
+{
+  "code":"x=0\ny=10/x",
+  "expected":"division_by_zero"
+}
+4.Safe
+{
+  "code":"x=2\ny=10/x",
+  "expected":"no_warning"
+}
+{
+  "code":"x=10/(3-(1+2))",
+  "expected":"division_by_zero"
+}

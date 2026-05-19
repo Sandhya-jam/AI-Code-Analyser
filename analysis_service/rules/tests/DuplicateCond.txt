@@ -1,0 +1,15 @@
+1.detect
+{
+  "code":"if x>5:\n    pass\nelif x>5:\n    pass",
+  "expected":"duplicate_condition"
+}
+2.Triple chain
+{
+  "code":"if x>5:\n    pass\nelif x<3:\n    pass\nelif x>5:\n    pass",
+  "expected":"duplicate_condition"
+}
+3.Nested else if
+{
+  "code":"if x>5:\n    pass\nelse:\n    if x>5:\n        pass",
+  "expected":"duplicate_condition"
+}
