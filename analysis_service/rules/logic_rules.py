@@ -112,6 +112,7 @@ def check_missing_return(source_code):
 def check_unused_variables(result):
     warnings=[]
     
+    IGNORED={"_","__"}
     # Global Scope
     global_assigned=set(result.get("global_assigned",[]))
     global_used=set(result.get("global_used",[]))
@@ -119,6 +120,7 @@ def check_unused_variables(result):
     unused_globals=global_assigned-global_used
     
     for var in unused_globals:
+        if var in IGNORED:continue
         warnings.append({
             "message": f"Global variable '{var}' assigned but never used",
             "severity": "LOW",
@@ -129,14 +131,17 @@ def check_unused_variables(result):
     # Function Scope
     function_assigned=result.get("function_assigned",{})
     function_used=result.get("function_used",{})
+    function_params=result.get("function_params",{})
     
     for func in function_assigned:
         assigned=set(function_assigned.get(func,[]))
         used=set(function_used.get(func,[]))
+        params=set(function_params.get(func,[]))
         
-        unused=assigned-used
+        unused=(assigned-used)-params
         
         for var in unused:
+            if var in IGNORED:continue
             warnings.append({
                 "message": f"Variable '{var}' assigned but never used in function '{func}'",
                 "severity": "LOW",
@@ -145,6 +150,37 @@ def check_unused_variables(result):
             })
     return warnings
 
+def is_constant_exp(node):
+    if isinstance(node,ast.Constant):
+        return True
+    
+    elif isinstance(node,ast.Compare):
+        return (
+            is_constant_exp(node.left) and 
+            all(is_constant_exp(c) for c in node.comparators)
+        )
+    # arithmetic
+    elif isinstance(node,ast.BinOp):
+        return(
+            is_constant_exp(node.left) and
+            is_constant_exp(node.right)
+        )
+    # boolean op
+    elif isinstance(node,ast.BoolOp):
+        return all(is_constant_exp(v) for v in node.values)
+    # unary op
+    elif isinstance(node,ast.UnaryOp):
+        return is_constant_exp(node.operand)
+    # explicitly reject runtime nodes
+    elif isinstance(node, (
+        ast.Name,
+        ast.Call,
+        ast.Attribute,
+        ast.Subscript
+    )):
+        return False
+    return False
+
 def check_constant_conditions(source_code):
     warnings=[]
     
@@ -152,24 +188,15 @@ def check_constant_conditions(source_code):
         tree=ast.parse(source_code)
         
         for node in ast.walk(tree):
-            if isinstance(node,ast.If):
-                if isinstance(node.test,ast.Constant):
+            if isinstance(node, (ast.If, ast.While)):
+
+                if is_constant_exp(node.test):
                     warnings.append({
                         "message": "Constant condition detected",
                         "severity": "MEDIUM",
                         "rule": "CONSTANT_CONDITION",
                         "line": node.lineno
                     })
-                
-                if isinstance(node.test,ast.Compare):
-                    if isinstance(node.test.left,ast.Constant) and \
-                        all(isinstance(comp,ast.Constant) for comp in node.test.comparators):
-                            warnings.append({
-                                "message": "Constant condition detected",
-                                "severity": "MEDIUM",
-                                "rule": "CONSTANT_CONDITION",
-                                "line": node.lineno
-                            })
     except:
         pass
     return warnings

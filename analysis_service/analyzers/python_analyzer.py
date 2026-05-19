@@ -7,6 +7,7 @@ class PythonAnalyzer(ast.NodeVisitor):
 
         self.functions = 0
         self.function_metrics = {}
+        self.function_params={}
 
         self.global_assigned = set()
         self.global_used = set()
@@ -66,7 +67,6 @@ class PythonAnalyzer(ast.NodeVisitor):
             self.global_used.update(scope["used"])
 
     def visit_FunctionDef(self, node):
-
         function_name = node.name
 
         self.functions += 1
@@ -75,10 +75,12 @@ class PythonAnalyzer(ast.NodeVisitor):
 
         self.current_function = function_name
 
-        # parameters count as assigned
-        for arg in node.args.args:
-            self.current_scope()["assigned"].add(arg.arg)
-
+        params=[arg.arg for arg in node.args.args]
+        self.function_params[function_name]=params
+        
+        for param in params:
+            self.current_scope()["assigned"].add(param)
+            
         self.function_metrics[function_name] = {
             "complexity": 1,
             "lines": len(node.body),
@@ -97,7 +99,7 @@ class PythonAnalyzer(ast.NodeVisitor):
         self.exit_scope()
 
         self.current_function = None
-
+ 
     def visit_Assign(self, node):
 
         for target in node.targets:
@@ -220,6 +222,7 @@ def analyze_python_code(source_code):
 
             "function_assigned": analyzer.function_assigned,
             "function_used": analyzer.function_used,
+            "function_params":analyzer.function_params,
 
             "loops": analyzer.loops,
             "conditionals": analyzer.conditionals,

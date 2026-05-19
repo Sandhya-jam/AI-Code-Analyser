@@ -1,0 +1,40 @@
+1.Direct constant
+{
+  "code": "if True:\n    print('hi')",
+  "expected": "constant_condition"
+}
+2.Comparison
+{
+  "code": "if 5 > 3:\n    print('hi')",
+  "expected": "constant_condition"
+}
+3.While
+{
+  "code": "while True:\n    break",
+  "expected": "constant_condition"
+}
+4.Arithmetic expression
+{
+  "code": "if 2 + 3:\n    print('hi')",
+  "expected": "constant_condition"
+}
+5.Boolean op
+{
+  "code": "if True and False:\n    print('hi')",
+  "expected": "constant_condition"
+}
+6.Unary
+{
+  "code": "if not False:\n    print('hi')",
+  "expected": "constant_condition"
+}
+7.Run time Exp 
+{
+  "code": "if input():\n    print('hi')",
+  "expected": "no_warning"
+}
+8.Variable
+{
+  "code": "x=True\nif x:\n    print('hi')",
+  "expected": "no_warning"
+}

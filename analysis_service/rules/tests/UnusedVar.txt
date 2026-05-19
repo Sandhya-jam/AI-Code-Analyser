@@ -1,0 +1,30 @@
+1. Basic
+{
+  "code": "def foo():\n    x = 5",
+  "expected": "unused_variable"
+}
+2.Parameter Edge Cases
+{
+  "code": "def foo(x):\n    return 5",
+  "expected": "no_warning"
+}
+3.Loop usage edge case
+{
+  "code": "def foo():\n    x = 5\n    for i in range(3):\n        print(i)",
+  "expected": "unused_variable"
+}
+4.Conditional usage
+{
+  "code": "def foo(flag):\n    x = 5\n    if flag:\n        print(x)",
+  "expected": "used_variable"
+}
+5.Try-except usage
+{
+  "code": "def foo():\n    x = 5\n    try:\n        print(x)\n    except:\n        pass",
+  "expected": "used_variable"
+}
+6.Shadowing confusion
+{
+  "code": "x = 10\ndef foo():\n    x = 5\n    print(x)",
+  "expected": "no_unused"
+}
