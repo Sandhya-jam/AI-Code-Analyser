@@ -1,0 +1,16 @@
+1.{
+  "code":"def foo(a,b,c,d,e,f):\n    pass",
+  "expected":"too_many_parameters"
+}
+2.{
+  "code":"def foo(a,b,c,*,d,e,f):\n    pass",
+  "expected":"too_many_parameters"
+}
+{
+  "code":"def foo(a,b,c,d,e,f,*args,**kwargs):\n    pass",
+  "expected":"too_many_parameters"
+}
+{
+  "code":"def foo(a,b,c):\n    pass",
+  "expected":"no_warning"
+}

@@ -18,61 +18,55 @@ def check_shadowed_variables(result):
     return warnings
 
 def check_redundant_assignment(source_code):
-
     findings = []
-    tree = ast.parse(source_code)
+    try:
+        tree = ast.parse(source_code)
+        def process_block(stmts):
+            last_assignment = {}
+            used_since = set()
 
-    # track assignments per scope
-    global_assignments = set()
+            for stmt in stmts:
 
-    for node in tree.body:
+                # detect variable usage FIRST
+                for node in ast.walk(stmt):
+                    if (
+                        isinstance(node, ast.Name) and
+                        isinstance(node.ctx, ast.Load)
+                    ):
+                        used_since.add(node.id)
+                # assignment handling
+                if isinstance(stmt, ast.Assign):
 
-        # GLOBAL SCOPE
-        if isinstance(node, ast.Assign):
-
-            for target in node.targets:
-
-                if isinstance(target, ast.Name):
-
-                    var = target.id
-
-                    if var in global_assignments:
-
-                        findings.append({
-                            "message": f"Redundant assignment detected for variable '{var}'",
-                            "severity": "LOW",
-                            "rule": "REDUNDANT_ASSIGNMENT",
-                            "line": node.lineno
-                        })
-
-                    global_assignments.add(var)
-
-        # FUNCTION SCOPE
-        if isinstance(node, ast.FunctionDef):
-
-            local_assignments = set()
-
-            for child in ast.walk(node):
-
-                if isinstance(child, ast.Assign):
-
-                    for target in child.targets:
+                    for target in stmt.targets:
 
                         if isinstance(target, ast.Name):
-
                             var = target.id
-
-                            if var in local_assignments:
-
+                            if (
+                                var in last_assignment and
+                                var not in used_since
+                            ):
                                 findings.append({
-                                    "message": f"Redundant assignment detected for variable '{var}' in function '{node.name}'",
+                                    "message":
+                                    f"Redundant assignment to '{var}'",
                                     "severity": "LOW",
                                     "rule": "REDUNDANT_ASSIGNMENT",
-                                    "line": child.lineno
+                                    "line": last_assignment[var]
                                 })
 
-                            local_assignments.add(var)
+                            last_assignment[var] = stmt.lineno
+                            # reset use tracking
+                            if var in used_since:
+                                used_since.remove(var)
 
+                # recurse into nested blocks
+                for field in ["body", "orelse"]:
+                    if hasattr(stmt, field):
+                        process_block(getattr(stmt, field))
+
+        process_block(tree.body)
+
+    except:
+        pass
     return findings
 
 def check_too_many_parameters(source_code):
@@ -83,11 +77,21 @@ def check_too_many_parameters(source_code):
         
         for node in ast.walk(tree):
             if isinstance(node,ast.FunctionDef):
-                if len(node.args.args)>5:
+                param_count=(
+                    len(node.args.args)+len(node.args.kwonlyargs)
+                )
+                if node.args.vararg:param_count+=1
+                if node.args.kwarg:param_count+=1
+                if param_count>5:
+                    severity=(
+                        "MEDIUM"
+                        if param_count>=8
+                        else "LOW"
+                    )
                     warnings.append({
-                        "message": f"Function '{node.name}' has too many parameters",
-                        "severity": "LOW",
-                        "rule": "TOO_MANY_PARAMETERS",
+                        "message":f"Function '{node.name}' has {param_count} parameters, which may reduce readability",
+                        "severity": severity,
+                        "rule":"TOO_MANY_PARAMETERS",
                         "line": node.lineno
                     })
     except:
