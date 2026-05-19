@@ -209,12 +209,13 @@ def check_unreachable_code(source_code):
         for node in ast.walk(tree):
             if hasattr(node,"body") and isinstance(node.body,list):
                 for i,stmt in enumerate(node.body[:-1]):
-                    if isinstance(stmt,(ast.Return,ast.Break,ast.Continue)):
+                    if isinstance(stmt,(ast.Return,ast.Break,ast.Continue,ast.Raise)):
+                        unreachable_stmt=node.body[i+1]
                         warnings.append({
                             "message": "Unreachable code detected after control statement",
                             "severity": "HIGH",
                             "rule": "UNREACHABLE_CODE",
-                            "line": stmt.lineno
+                            "line": unreachable_stmt.lineno
                         })
     except:
         pass

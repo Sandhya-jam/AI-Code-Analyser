@@ -1,0 +1,50 @@
+1.Return
+{
+  "code": "def foo():\n    return 1\n    print('hi')",
+  "expected": "unreachable_code"
+}
+2.Break
+{
+  "code": "while True:\n    break\n    print('hello')",
+  "expected": "unreachable_code"
+}
+3.Continue
+{
+  "code": "for i in range(5):\n    continue\n    print(i)",
+  "expected": "unreachable_code"
+}
+4.Raise
+{
+  "code": "raise Exception('error')\nprint('hi')",
+  "expected": "unreachable_code"
+}
+5.Nested return inside if
+{
+  "code": "def foo(x):\n    if x > 0:\n        return x\n        print('never')",
+  "expected": "unreachable_code"
+}
+6. Nested continue inside loop
+{
+  "code": "for i in range(5):\n    if i == 2:\n        continue\n        print('skip')",
+  "expected": "unreachable_code"
+}
+7. Return as last statement
+{
+  "code": "def foo():\n    return 1",
+  "expected": "no_warning"
+}
+8.Return in one branch only
+{
+  "code": "def foo(x):\n    if x > 0:\n        return x\n    print('reachable')",
+  "expected": "no_warning"
+}
+9.Break inside nested if
+{
+  "code": "while True:\n    if True:\n        break\n        print('dead')",
+  "expected": "unreachable_code"
+}
+10.Try+Raise
+{
+  "code": "try:\n    raise Exception()\n    print('dead')\nexcept:\n    pass",
+  "expected": "unreachable_code"
+}
