@@ -32,9 +32,19 @@ export const fixCode=async(code)=>{
     return response.data
 };
 
-export const getHistory=async()=>{
-    const response=await API.get('/code/history');
+export const getHistory=async(params={})=>{
+    const response=await API.get('/code/history',{params});
     return response.data;
 };
+
+export const getHistoryById=async(id)=>{
+    const response=await API.get(`/code/history/${id}`);
+    return response.data;
+}
+
+export const getHistoryStats=async()=>{
+    const response=await API.get('/code/history/stats');
+    return response.data;
+}
 
 export default API;

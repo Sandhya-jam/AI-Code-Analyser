@@ -40,13 +40,6 @@ export const fix=async(req,res)=>{
     res.json(result);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Code Fix Failed Failed" });
+    res.status(500).json({ error: "Code Fix Failed" });
   }
-};
-
-export const getUserhistory=async(req,res)=>{
-   const history = await History.find({ user:req.user })
-.sort({ createdAt:-1 });
-
-   res.json(history);
 };

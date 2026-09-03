@@ -10,20 +10,7 @@ const History = () => {
         action:"all",
         severity:"all"
         });
-    const filteredHistory = history.filter(item=>{
-    if(filters.action !== "all" && item.action !== filters.action){
-    return false;
-    }
-
-    if(filters.severity !== "all"){
-
-    const issues = item.result?.[filters.severity];
-    if(!issues || issues.length === 0){
-        return false;
-    }
-    }
-    return true;
-    });
+    
     useEffect(()=>{
         async function fetchHistory() {
             const data=await getHistory();
