@@ -20,7 +20,7 @@ export const getUserhistory=async(req,res)=>{
         }
         //Severity Filter
         if(severity && severity!=="all"){
-            filter[`result.analysis.${severity}`] = { 
+            filter[`result.${severity}`] = { 
               $exists: true, 
             };
         }
@@ -30,7 +30,15 @@ export const getUserhistory=async(req,res)=>{
             .sort({createdAt:-1})
             .skip(skip)
             .limit(limit)
-            .select("-code -fixedCode -result"),
+            .select({
+                code:0,
+                fixedCode:0,
+                "result.analysis.explanation":0,
+                "result.analysis.suggestions":0,
+                "result.analysis.logical_bugs":0,
+                "result.analysis.security_issues":0,
+                "result.analysis.bug_fixes":0
+            }),
 
           History.countDocuments(filter)
         ]);
