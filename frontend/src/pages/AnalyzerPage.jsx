@@ -18,6 +18,7 @@ const navigate=useNavigate();
 
 async function handleAnalyze(code){
       const data=await analyzeCode(code);
+      console.log("Analysis Result:",data);
       setResult(data);
 
       const newMarkers=[];
@@ -43,6 +44,7 @@ async function handleAnalyze(code){
 async function handleFix(code){
 try {
   const data = await fixCode(code);
+  console.log("Fix Result:",data);
 
   if(data.fixed_code){
   setFixedCode(data.fixed_code);

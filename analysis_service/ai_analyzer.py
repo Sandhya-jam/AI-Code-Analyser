@@ -6,11 +6,27 @@ import re
 
 load_dotenv()
 
-client=Groq(
-    api_key=os.getenv("GROQ_API_KEY")
-)
+api_key = os.getenv("GROQ_API_KEY")
 
-MODEL="llama-3.3-70b-versatile"
+print("GROQ KEY EXISTS:", bool(api_key))
+print("GROQ KEY PREFIX:", api_key[:8] if api_key else None)
+client = Groq(api_key=api_key)
+
+MODEL = "openai/gpt-oss-120b"
+
+try:
+    model=client.models.retrieve(MODEL)
+    print("MODEL ACCESS:",model.id)
+except Exception as e:
+    print("ERROR:",str(e))
+
+try:
+    models=client.models.list()
+    print("\n======AVAILABLE MODELS======")
+    for model in models.data:
+        print(model.id)
+except Exception as e:
+    print("MODEL LIST ERROR:",e)
 
 def extract_json(text):
     """
