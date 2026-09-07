@@ -112,6 +112,9 @@ Focus on logical bugs, algorithm inefficiencies, and security issues.
 - duplicate conditions
 - unreachable code
 - shadowed variables
+- infinite loop with no exit
+- missing return
+- constant condition
 
 Return STRICT JSON in this format:
 Do NOT include markdown or explanations outside JSON.

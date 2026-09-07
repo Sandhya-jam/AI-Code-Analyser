@@ -49,26 +49,40 @@ def apply_rules(result,source_code):
     
     return warnings
 
-def calculate_risk_score(result,critical,high,medium,low):
-    total_lines=result.get("total_lines",1)
-    complexity=result.get("cyclomatic_complexity",1)
-    
-    total_bugs=len(critical)+len(high)+len(medium)+len(low)
-    
-    bug_density=total_bugs/total_lines
-    
-    risk_score=100
-    
-    # severity penalities
-    risk_score-=len(critical)*20
-    risk_score-=len(high)*12
-    risk_score-=len(medium)*6
-    risk_score-=len(low)*2
-    
-    # complexity penalty
-    risk_score-=complexity*0.5
-    
-    # bug density penalty
-    risk_score-=bug_density*100
-    
-    return max(int(risk_score),0)
+def calculate_risk_score(result, critical, high, medium, low):
+
+    total_lines = max(result.get("total_lines", 1), 1)
+    complexity = max(result.get("cyclomatic_complexity", 1), 1)
+
+    severity_points = (
+        len(critical) * 10 +
+        len(high) * 6 +
+        len(medium) * 3 +
+        len(low) * 1
+    )
+
+    # Maximum severity contribution
+    severity_penalty = min(severity_points, 60)
+
+    complexity_penalty = max(complexity - 10, 0) * 1.5
+    complexity_penalty = min(complexity_penalty, 20)
+
+    total_bugs = (
+        len(critical) +
+        len(high) +
+        len(medium) +
+        len(low)
+    )
+
+    bugs_per_100_lines = (total_bugs / total_lines) * 100
+
+    density_penalty = min(bugs_per_100_lines * 2, 20)
+
+    risk_score = (
+        100
+        - severity_penalty
+        - complexity_penalty
+        - density_penalty
+    )
+
+    return max(min(round(risk_score), 100), 0)
