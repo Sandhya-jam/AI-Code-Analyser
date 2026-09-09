@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import History from "../models/historyModel.js";
 
 export const getUserhistory=async(req,res)=>{
@@ -74,7 +75,7 @@ export const getHistoryById=async(req,res)=>{
 
 export const getHistoryStats=async(req,res)=>{
     try{
-        const userId=new mongoose.Types.ObjectId(req.user);
+        const userId=new mongoose.Types.ObjectId(req.user.toString());
         const stats=await History.aggregate([
             {$match:{user:userId}},
             {$facet:{
@@ -84,12 +85,12 @@ export const getHistoryStats=async(req,res)=>{
                             _id:null,
                             totalAnalyses:{$sum:{$cond:[{$eq:["$action","analyze"]},1,0]}},
                             totalFixes:{$sum:{$cond:[{$eq:["$action","fix"]},1,0]}},
-                            averageRiskScore:{$avg:"$result.analysis.risk_score"},
+                            averageRiskScore:{$avg:"$result.risk_score"},
                             totalIssues:{$sum:{$add:[
-                                {$size:{$ifNull:["$result.analysis.critical",[]]}},
-                                {$size:{$ifNull:["$result.analysis.high",[]]}},
-                                {$size:{$ifNull:["$result.analysis.medium",[]]}},
-                                {$size:{$ifNull:["$result.analysis.low",[]]}}
+                                {$size:{$ifNull:["$result.critical",[]]}},
+                                {$size:{$ifNull:["$result.high",[]]}},
+                                {$size:{$ifNull:["$result.medium",[]]}},
+                                {$size:{$ifNull:["$result.low",[]]}}
                             ]}}
                         }
                     }
@@ -98,10 +99,10 @@ export const getHistoryStats=async(req,res)=>{
                     {
                         $group:{
                             _id:null,
-                            critical:{$sum:{$size:{$ifNull:["$result.analysis.critical",[]]}}},
-                            high:{$sum:{$size:{$ifNull:["$result.analysis.high",[]]}}},
-                            medium:{$sum:{$size:{$ifNull:["$result.analysis.medium",[]]}}},
-                            low:{$sum:{$size:{$ifNull:["$result.analysis.low",[]]}}}
+                            critical:{$sum:{$size:{$ifNull:["$result.critical",[]]}}},
+                            high:{$sum:{$size:{$ifNull:["$result.high",[]]}}},
+                            medium:{$sum:{$size:{$ifNull:["$result.medium",[]]}}},
+                            low:{$sum:{$size:{$ifNull:["$result.low",[]]}}}
                         }
                     }
                 ],
@@ -123,7 +124,7 @@ export const getHistoryStats=async(req,res)=>{
                         $match:{"result.ai_analysis.time_complexity":{$exists:true}}
                     },
                     {
-                        $group:{_id:"result.ai_analysis.time_complexity",count:{$sum:1}}
+                        $group:{_id:"$result.ai_analysis.time_complexity",count:{$sum:1}}
                     },
                     {$sort:{count:-1}}
                 ],
@@ -132,13 +133,14 @@ export const getHistoryStats=async(req,res)=>{
                         $match:{"result.ai_analysis.space_complexity":{$exists:true}}
                     },
                     {
-                        $group:{_id:"result.ai_analysis.space_complexity",count:{$sum:1}}
+                        $group:{_id:"$result.ai_analysis.space_complexity",count:{$sum:1}}
                     },
                     {$sort:{count:-1}}
                 ],
             }}
         ]);
         const data=stats[0];
+        console.log(data)
         res.json({
             overview:data.overview[0]||{
                 totalAnalyses:0,
