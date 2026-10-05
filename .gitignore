@@ -11,6 +11,15 @@ analysis_service/venv/
 analysis_service/__pycache__/
 analysis_service/*.pyc 
 
+# RAG raw datasets
+analysis_service/rag/knowledge/dsa/raw/
+
+# Processed RAG corpus
+analysis_service/rag/knowledge/dsa/processed/
+
+# Chroma database
+analysis_service/rag/chroma/
+
 #Environment variables
 backend/.env 
 analysis_service/.env
