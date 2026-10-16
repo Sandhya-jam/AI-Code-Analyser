@@ -16,6 +16,7 @@ INPUT_FILES = [
     CHUNKS_DIR / "code" / "code_chunks.jsonl",
     CHUNKS_DIR / "theory" / "theory_chunks.jsonl",
     CHUNKS_DIR / "complexity" / "complexity_chunks.jsonl",
+    CHUNKS_DIR / "algorithm_complexity"/ "algorithm_complexity_chunks.jsonl",
 ]
 
 COLLECTION_NAME = "dsa_knowledge"
@@ -31,12 +32,22 @@ embedding_function = SentenceTransformerEmbeddingFunction(
 
 client = chromadb.PersistentClient(path=str(DB_DIR))
 
-collection = client.get_or_create_collection(
+
+COLLECTION_NAME = "dsa_knowledge"
+
+# Delete the previous collection to prevent stale chunks.
+existing_collections = [
+    item.name for item in client.list_collections()
+]
+
+if COLLECTION_NAME in existing_collections:
+    client.delete_collection(name=COLLECTION_NAME)
+    print(f"Deleted old collection: {COLLECTION_NAME}")
+
+# Create a fresh collection using the same embedding model.
+collection = client.create_collection(
     name=COLLECTION_NAME,
     embedding_function=embedding_function,
-    metadata={
-        "description": "Python DSA and competitive programming knowledge"
-    },
 )
 
 # LOAD CHUNKS
